@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r setup-conda, include = FALSE}
-source("run-once.R")
+source("../doc/run-once.R")
 ```
 
 
