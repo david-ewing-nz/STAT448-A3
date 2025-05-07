@@ -1,0 +1,76 @@
+---
+title: "STAT448-Assignment3"
+author: " Lillian Lee 32198314 ,
+          David Ewing 82171149"
+date: "2025-05-06"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r , include=F,eval=F} 
+knitr::opts_chunk$set(echo = TRUE)
+library(keras)
+library(tensorflow)
+library(dplyr)
+
+```
+
+# Q1A
+
+##  Neural Network Forward Propagation
+
+
+```{r q1a}
+W1 <- matrix(c(1, 0, 2, 6), nrow = 2, byrow = TRUE)
+b1 <- matrix(c(-1, 3), nrow = 2)
+W2 <- matrix(c(-1, 7), nrow = 1)
+b2 <- 5
+X <- matrix(c(5, -7), nrow = 2)
+
+relu <- function(z) pmax(0, z)
+
+Z1 <- W1 %*% X + b1
+A1 <- relu(Z1)
+Z2 <- W2 %*% A1 + b2
+A2 <- relu(Z2)
+A2
+```
+
+#  Q1B
+##  Convolution with Filters
+
+```{r q1b}
+I <- matrix(c(
+  1, 0, 0, 0, 1,
+  0, 1, 0, 1, 0,
+  0, 0, 1, 0, 0,
+  0, 1, 1, 1, 0,
+  1, 0, 1, 0, 1
+), nrow = 5, byrow = TRUE)
+
+F1 <- matrix(c(0,0,0,0,1,0,0,0,0), nrow = 3, byrow = TRUE)
+F2 <- matrix(0, nrow = 3, ncol = 3)
+F3 <- matrix(c(0, -1, 0, -1, 4, -1, 0, -1, 0), nrow = 3, byrow = TRUE)
+
+convolve_valid <- function(img, filt) {
+  s <- 3
+  out <- matrix(0, nrow = 3, ncol = 3)
+  for (i in 1:3) {
+    for (j in 1:3) {
+      region <- img[i:(i+s-1), j:(j+s-1)]
+      out[i, j] <- sum(region * filt)
+    }
+  }
+  relu(out)
+}
+
+feature_map_1 <- convolve_valid(I, F1)
+feature_map_2 <- convolve_valid(I, F2)
+feature_map_3 <- convolve_valid(I, F3)
+
+feature_map_1
+feature_map_2
+feature_map_3
+```
+

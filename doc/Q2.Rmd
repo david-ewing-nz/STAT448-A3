@@ -1,0 +1,102 @@
+---
+title: "STAT448-Assignment3"
+author: " Lillian Lee 32198314 ,
+          David Ewing 82171149"
+date: "2025-05-06"
+output: html_document
+---
+
+```{r q2-env-setup, include=FALSE}
+if (!exists("knitr_in_child")) knitr_in_child <- FALSE
+if (!knitr_in_child) {
+  library(reticulate)
+  library(keras)
+  library(tensorflow)
+  library(dplyr)
+  library(tibble)
+  if (!reticulate::py_module_available("tensorflow")) {
+    stop("TensorFlow not available. Please run keras::install_keras().")
+  }
+  knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+}
+# Only run this if NOT inside a child document
+if (!exists("knitr_in_child")) {
+  library(reticulate)
+  library(keras)
+  library(tensorflow)
+  library(dplyr)
+  library(tibble)
+
+  if (!reticulate::py_module_available("tensorflow")) {
+    stop("TensorFlow is not available. Run keras::install_keras() in the R console first.")
+  }
+
+  knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+}
+
+```
+
+# Question 2: Experimental Report on Fashion MNIST
+
+```{r q2-load-data, eval=T}
+fashion_mnist <- dataset_fashion_mnist()
+x_train <- fashion_mnist$train$x / 255
+y_train <- fashion_mnist$train$y
+x_test  <- fashion_mnist$test$x / 255
+y_test  <- fashion_mnist$test$y
+
+x_train <- array_reshape(x_train, c(nrow(x_train), 28*28))
+x_test  <- array_reshape(x_test, c(nrow(x_test), 28*28))
+```
+
+```{r q2-model-def, eval=T}
+create_model <- function(units = 128, optimizer = "adam") {
+  model <- keras_model_sequential() |>
+    layer_dense(units = units, activation = "relu", input_shape = 784) |>
+    layer_dropout(rate = 0.4) |>
+    layer_dense(units = 10, activation = "softmax")
+  
+  model |> compile(
+    loss      = "sparse_categorical_crossentropy",
+    optimizer = optimizer,
+    metrics   = c("accuracy")
+  )
+  return(model)
+}
+```
+
+```{r q2-train-eval, eval=T}
+results  <- list()
+settings <- expand.grid(units = c(64, 128), optimizer = c("adam", "sgd"), batch_size = c(32, 64))
+
+for (i in 1:nrow(settings)) {
+  set <- settings[i, ]
+  cat("Training configuration:", set, "\n")
+  model   <- create_model(units = set$units, optimizer = set$optimizer)
+  history <- model |> fit(
+    x_train, y_train,
+    epochs           = 10,
+    batch_size       = set$batch_size,
+    validation_split = 0.2,
+    verbose          = 0
+  )
+  score <- model |> evaluate(x_test, y_test, verbose = 0)
+  results[[i]] <- list(config = set, score = score)
+}
+results
+```
+
+## Summary Table
+
+```{r q2-summary-table, eval=T}
+library(tibble)
+res_tbl <- tibble::tibble(
+  units = sapply(results, function(r) r$config$units),
+  optimizer = sapply(results, function(r) r$config$optimizer),
+  batch_size = sapply(results, function(r) r$config$batch_size),
+  test_accuracy = sapply(results, function(r) r$score[[2]])
+)
+res_tbl
+```
+
+Add figure captions, plots, and analysis as part of the final report (max 5 pages).

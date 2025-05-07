@@ -1,0 +1,74 @@
+---
+title: "STAT448-Assignment3"
+author: " Lillian Lee 32198314 ,
+          David Ewing 82171149"
+date: "2025-05-06"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup-conda, include = FALSE}
+source("run-once.R")
+```
+
+
+
+
+```{r setup-python-env, eval = FALSE}
+library(reticulate)
+
+# Use a named Conda environment (default = "r-reticulate")
+use_condaenv("r-reticulate", required = TRUE)
+
+# Optionally install missing packages
+if (!py_module_available("pandas")) {
+  message("Installing missing Python packages into conda env 'r-reticulate'...")
+  py_install(c("pandas", "numpy", "scikit-learn"), method = "conda", envname = "r-reticulate")
+}
+```
+
+
+```{r setup, include=FALSE}
+
+ 
+options(repos = c(CRAN = "https://cran.stat.auckland.ac.nz/"))
+
+required_packages <- c("keras", "tensorflow", "dplyr","reticulate","glue")
+for (pkg in required_packages) {
+  if (!requireNamespace(pkg, quietly = TRUE)) install.packages(pkg)
+  library(pkg, character.only = TRUE)
+}
+#source("./run-once.R")
+
+# Warn if TensorFlow backend not available, but DO NOT install it here
+if (!reticulate::py_module_available("tensorflow")) {
+  message("WARNING: TensorFlow Python module not found. Please run keras::install_keras() in a fresh R session.")
+}
+
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+# Appendix - Common Functions
+
+
+
+\newpage
+
+# Question A: 
+
+```{r load-Q1, child="./Q1.Rmd", eval=T}
+
+```
+
+\newpage
+
+# Question B: 
+
+```{r q2-flag, include=FALSE}
+knitr_in_child <- TRUE
+```
+
+```{r q2-child, eval = reticulate::py_module_available("tensorflow"), child = "./Q2.Rmd"}
+
+```
